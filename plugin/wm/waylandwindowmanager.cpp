@@ -104,7 +104,22 @@ void WaylandWindowManager::setupWaylandIntegration()
 KWayland::Client::PlasmaWindow *WaylandWindowManager::windowFor(QVariant wid)
 {
     auto it = std::find_if(m_windowManagement->windows().constBegin(), m_windowManagement->windows().constEnd(), [&wid](KWayland::Client::PlasmaWindow * w) noexcept {
-            return w->isValid() && w->internalId() == wid.toUInt();
+        if (!w->isValid()) {
+            return false;
+        }
+
+//After KF5 5.73 you should use uuid() but in that version it still doesn't work, so use the deprecated internalId as well.
+        if (w->internalId() == wid.toUInt()) {
+            return true;
+        }
+
+#if KF5_CURRENTMINOR_VERSION >= 73
+// After KF5 uuid() is available but still empty, check for that case so an empty wid will not return true.
+        if (!w->uuid().isEmpty() && w->uuid() == wid.toByteArray()){
+            return true;
+        }
+#endif
+        return false;
     });
 
     if (it == m_windowManagement->windows().constEnd()) {

@@ -22,6 +22,7 @@
 #include "appmenuplugin.h"
 #include "appmenumodel.h"
 #include "schemesmodel.h"
+#include "environment.h"
 #include <QQmlEngine>
 
 
@@ -30,4 +31,5 @@ void AppmenuPlugin::registerTypes(const char *uri)
     Q_ASSERT(uri == QLatin1String("org.kde.private.windowAppMenu"));
     qmlRegisterType<AppMenuModel>(uri, 0, 1, "AppMenuModel");
     qmlRegisterType<SchemesModel>(uri, 0, 1, "SchemesModel");
+    qmlRegisterSingletonType<Environment>(uri, 0, 1, "Environment", &Environment::instance);
 }

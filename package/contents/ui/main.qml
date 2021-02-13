@@ -37,6 +37,35 @@ Item {
     readonly property bool vertical: plasmoid.formFactor === PlasmaCore.Types.Vertical
     readonly property bool view: inCompactView
     readonly property bool inEditMode: plasmoid.userConfiguring || latteInEditMode
+    readonly property bool plasma515: AppMenuPrivate.Environment.plasmaDesktopVersion >= AppMenuPrivate.Environment.makeVersion(5,15,0)
+    readonly property bool isStackingOrderSupported: {
+        var supported = false;
+
+        if (latteBridge) {
+            if (latteBridge.version < latteBridge.actions.version(0,9,75)) { // TODO: replace with version that actually has the patches. Fix version in latte-dock , it's lagging.
+                supported = false;
+            } else if (AppMenuPrivate.Environment.isPlatformX11) {
+                supported = true;
+            } else if (AppMenuPrivate.Environment.isPlatformWayland &&
+                    AppMenuPrivate.Environment.frameworksVersion >= AppMenuPrivate.Environment.makeVersion(5,73,0)) {
+                supported = true;
+            }
+        } else {
+            if (AppMenuPrivate.Environment.isPlatformX11 &&
+                    AppMenuPrivate.Environment.plasmaDesktopVersion >= AppMenuPrivate.Environment.makeVersion(5,18,0)) {
+                supported = true;
+            } else if (AppMenuPrivate.Environment.isPlatformWayland &&
+                    AppMenuPrivate.Environment.plasmaDesktopVersion >= AppMenuPrivate.Environment.makeVersion(5,21,2)) { // TODO: replace with version that actually has the patches
+                supported = true;
+            }
+        }
+
+        plasmoid.configuration.isStackingOrderSupported = supported;
+
+        return supported;
+    }
+
+    readonly property bool useAnyMaximizedWindow: plasmoid.configuration.filterByAnyMaximized && isStackingOrderSupported
     readonly property bool menuAvailable: appMenuModel.menuAvailable
     readonly property bool kcmAuthorized: KCMShell.authorize(["style.desktop"]).length > 0
 
@@ -143,7 +172,7 @@ Item {
     readonly property bool isLastActiveWindowMinimizable: lastActiveTaskItem && existsWindowShown && lastActiveTaskItem.isMinimizable
     readonly property bool isLastActiveWindowVirtualDesktopsChangeable: lastActiveTaskItem && existsWindowShown && lastActiveTaskItem.isVirtualDesktopsChangeable
 
-    readonly property Item lastActiveTaskItem: windowInfoLoader.item.lastActiveTaskItem
+    readonly property Item lastActiveTaskItem: windowInfoLoader.item.operatingTaskItem
 
     Loader {
         id: windowInfoLoader
@@ -171,6 +200,7 @@ Item {
     onViewChanged: {
         plasmoid.nativeInterface.view = view;
     }
+
 
     Component.onCompleted: {
         plasmoid.configuration.supportsActiveWindowSchemes = false;
@@ -470,12 +500,12 @@ Item {
             plasmoid.nativeInterface.model = appMenuModel
         }
 
-        winId: latteBridge && existsWindowShown && lastActiveTaskItem ? lastActiveTaskItem.winId : -1
+        winId: existsWindowShown && lastActiveTaskItem ? lastActiveTaskItem.winId : -1
 
         readonly property bool ignoreWindow: {
             var shownFilter = !existsWindowShown;
             var activeFilter = plasmoid.configuration.filterByActive ? !existsWindowActive : false;
-            var maximizedFilter = plasmoid.configuration.filterByMaximized ? !isLastActiveWindowMaximized : false;
+            var maximizedFilter = plasmoid.configuration.filterByMaximized || useAnyMaximizedWindow ?  !isLastActiveWindowMaximized : false;
 
             return (shownFilter || activeFilter || maximizedFilter);
         }

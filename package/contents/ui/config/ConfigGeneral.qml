@@ -36,6 +36,7 @@ Item {
     property alias cfg_fillWidth: fillWidthChk.checked
     property alias cfg_filterByActive: activeChk.checked
     property alias cfg_filterByMaximized: maximizedChk.checked
+    property alias cfg_filterByAnyMaximized: anyMaximizedChk.checked
     property alias cfg_filterChildrenWindows: childrenChk.checked
     property alias cfg_filterByScreen: screenAwareChk.checked
     property alias cfg_selectedScheme: configGeneral.selectedScheme
@@ -52,6 +53,12 @@ Item {
     // used from the ui
     readonly property real centerFactor: 0.3
     readonly property int minimumWidth: 220
+
+    Component.onCompleted: {
+        if (!plasmoid.configuration.isStackingOrderSupported && cfg_filterByAnyMaximized) {
+            cfg_filterByAnyMaximized = false;
+        }
+    }
 
     AppMenuPrivate.SchemesModel {
         id: schemesModel
@@ -279,6 +286,16 @@ Item {
 
             Controls.CheckBox {
                 id: maximizedChk
+                text: i18n("Show only menus from active maximized windows")
+            }
+
+            Controls.Label {
+                visible: plasmoid.configuration.isStackingOrderSupported
+            }
+
+            Controls.CheckBox {
+                id: anyMaximizedChk
+                visible: plasmoid.configuration.isStackingOrderSupported
                 text: i18n("Show only menus from maximized windows")
             }
         }

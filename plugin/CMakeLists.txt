@@ -4,6 +4,7 @@ set(appmenuapplet_SRCS
     commontools.cpp
     schemecolors.cpp
     schemesmodel.cpp
+    environment.cpp
     wm/abstractwindowmanager.cpp
     wm/waylandwindowmanager.cpp
     wm/x11fallbackwindowmanager.cpp

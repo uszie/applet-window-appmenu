@@ -30,6 +30,14 @@
       <label>If true it only shows the app menu if the current active window is maximized</label>
       <default>false</default>
     </entry>
+    <entry name="filterByAnyMaximized" type="Bool">
+      <label>If true it only shows the app menu if any window is maximized</label>
+      <default>false</default>
+    </entry>
+    <entry name="isStackingOrderSupported" type="Bool">
+        <default>false</default>
+        <label>Do not change it is used to communicate stacking order support between the applet and the config widget</label>
+    </entry>
     <entry name="spacing" type="Int">
       <label>Spacing between menu items</label>
       <default>6</default>

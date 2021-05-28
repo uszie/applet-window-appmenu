@@ -49,14 +49,16 @@ Item {
     }
 
     readonly property bool menuOpened: plasmoid.nativeInterface.currentIndex === buttonIndex
-    readonly property int shadow: 3
+    readonly property int shadow: 0//3
 
     readonly property int implicitWidth: {
         if (itemLoader.item) {
+            // use Math.ceil to roundup
+            // now a menubar item matches the size of the menuitem in Breeze Lim, where integers are used
             if (buttonItem.text !== "") {
-                return itemLoader.item.implicitWidth + plasmoid.configuration.spacing * 2 + 2*shadow;
+                return Math.ceil(itemLoader.item.implicitWidth) + plasmoid.configuration.spacing * 2 + 2*shadow;
             } else {
-                return itemLoader.item.implicitWidth + units.smallspacing * 2 + 2*shadow;
+                return Math.ceil(itemLoader.item.implicitWidth) + 2*shadow;
             }
         }
 
@@ -66,9 +68,9 @@ Item {
     readonly property int implicitHeight: {
         if (itemLoader.item) {
             if (buttonItem.text !== "") {
-                return itemLoader.item.implicitHeight + units.smallspacing * 2 + 2*shadow;
+                return Math.ceil(itemLoader.item.implicitHeight) + units.smallspacing * 2 + 2*shadow;
             } else {
-                return itemLoader.item.implicitHeight + units.smallspacing * 2 + 2*shadow;
+                return Math.ceil(itemLoader.item.implicitHeight) + 2*shadow;
             }
         }
 
@@ -101,30 +103,31 @@ Item {
         Rectangle {
             id: button
             anchors.fill: parent
-            anchors.topMargin: 1
-            anchors.bottomMargin: 1
+            // remove margins to match Breeze menubar style
+            anchors.topMargin: 0//1
+            anchors.bottomMargin: 0//1
             anchors.leftMargin: buttonItem.shadow
             anchors.rightMargin: buttonItem.shadow
-
-            radius: buttonItem.shadow
+            // remove rounding to match Breeze menubar style
+            radius: 0//buttonItem.shadow
 
             // fake highlighted
             color: {
                 if (menuOpened) {
-                    return enforceLattePalette ? root.latteBridge.palette.highlightColor : theme.highlightColor
+                    return enforceLattePalette ? root.latteBridge.palette.buttonFocusColor : theme.buttonFocusColor
                 } else if (buttonItem.containsMouse) {
-                    return enforceLattePalette ? root.latteBridge.palette.buttonBackgroundColor : theme.buttonBackgroundColor
+                    return enforceLattePalette ? root.latteBridge.palette.buttonFocusColor : theme.buttonFocusColor
                 } else {
                     return 'transparent';
                 }
             }
-
-            layer.enabled: menuOpened || buttonItem.containsMouse
-            layer.effect: DropShadow{
-                radius: buttonItem.shadow
-                samples: 2 * radius
-                color: "#ff151515"
-            }
+            // remove dropshadow to match Breeze menubar style
+//            layer.enabled: menuOpened || buttonItem.containsMouse
+//            layer.effect: DropShadow{
+//                radius: buttonItem.shadow
+//                samples: 2 * radius
+//                color: "#ff151515"
+//            }
         }
 
         Loader{
